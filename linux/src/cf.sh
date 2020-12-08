@@ -2,7 +2,9 @@
 # random cloudflare anycast ip
 declare -i bandwidth
 declare -i speed
-read -p "请设置期望到 CloudFlare 服务器的带宽大小(单位 Mbps):" bandwidth
+#read -p "请设置期望到 CloudFlare 服务器的带宽大小(单位 Mbps):" bandwidth
+bandwidth=20
+echo "请设置期望到 CloudFlare 服务器的带宽大小(单位 Mbps):$bandwidth"
 speed=bandwidth*128*1024
 starttime=`date +'%Y-%m-%d %H:%M:%S'`
 while true
@@ -54,7 +56,7 @@ do
 		ls -S temp > ip.txt
 		rm -rf temp
 		n=$(wc -l ip.txt | awk '{print $1}')
-		if [ $n -ge 3 ]; then
+		if [ $n -ge 1 ]; then
 			first=$(sed -n '1p' ip.txt)
 			second=$(sed -n '2p' ip.txt)
 			third=$(sed -n '3p' ip.txt)
@@ -265,9 +267,10 @@ do
 			max=$[$max/1024]
 			echo 峰值速度 $max kB/s
 		fi
+		sleep $(grep -m1 -ao '[0-5]' /dev/urandom | head -n1)m
 	done
-		break
-done
+#		break
+#done
 	max=$[$max/1024]
 	endtime=`date +'%Y-%m-%d %H:%M:%S'`
 	start_seconds=$(date --date="$starttime" +%s)
@@ -294,8 +297,9 @@ done
 		echo 数据库 $databasenew 已经自动更新完毕
 	fi
 	rm -rf temp.txt
-	echo 优选IP $anycast 满足 $bandwidth Mbps带宽需求
-	echo 峰值速度 $max kB/s
+	echo 优选IP $anycast 满足 $bandwidth Mbps带宽需求  >> /mnt/cf/result.txt
+	echo 峰值速度 $max kB/s >> /mnt/cf/result.txt
 	echo 公网IP $publicip
 	echo 数据中心 $colo
-	echo 总计用时 $((end_seconds-start_seconds)) 秒
+	echo 总计用时 $((end_seconds-start_seconds)) 秒 >> /mnt/cf/result.txt
+done
